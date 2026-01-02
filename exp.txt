@@ -1,0 +1,20 @@
+CUDA_VISIBLE_DEVICES=0 python evaluate.py --val_datasets matterport3d stanford2d3d metropolis --max_depths 10.0 10.0 100.0  --model_path checkpoints/DA360_small.pth --batch_size 1  --alignment 1 --model_name DA360_small --save_samples 
+    abs_err |   abs_rel |    sq_rel |       rms |   rms_log |     log10 |        a1 |        a2 |        a3 | 
+&   0.23641 &   0.09625 &   0.13407 &   0.49710 &   0.06819 &   0.03946 &   0.91601 &   0.97273 &   0.98601 
+&   0.12894 &   0.06873 &   0.05918 &   0.30094 &   0.05320 &   0.02853 &   0.94838 &   0.98268 &   0.99251 
+&   6.30037 &   0.23319 &   5.60394 &   12.33086 &   0.15221 &   0.09337 &   0.69633 &   0.88693 &   0.94696 
+
+CUDA_VISIBLE_DEVICES=0 python evaluate.py --val_datasets matterport3d stanford2d3d metropolis --max_depths 10.0 10.0 100.0  --model_path checkpoints/DA360_base.pth --batch_size 1  --alignment 1 --model_name DA360_base --save_samples 
+    abs_err |   abs_rel |    sq_rel |       rms |   rms_log |     log10 |        a1 |        a2 |        a3 | 
+&   0.21300 &   0.08766 &   0.12346 &   0.46840 &   0.06525 &   0.03595 &   0.92929 &   0.97493 &   0.98590 
+&   0.12230 &   0.06512 &   0.06343 &   0.30099 &   0.05373 &   0.02730 &   0.94762 &   0.97747 &   0.99072 
+&   5.91863 &   0.21961 &   5.35682 &   11.92655 &   0.14777 &   0.08755 &   0.72455 &   0.90183 &   0.95292 
+
+CUDA_VISIBLE_DEVICES=0 python evaluate.py --val_datasets matterport3d stanford2d3d metropolis --max_depths 10.0 10.0 100.0  --model_path checkpoints/DA360_large.pth --batch_size 1  --alignment 1 --model_name DA360_large --save_samples 
+    abs_err |   abs_rel |    sq_rel |       rms |   rms_log |     log10 |        a1 |        a2 |        a3 | 
+&   0.19307 &   0.07926 &   0.11007 &   0.44067 &   0.06189 &   0.03258 &   0.94072 &   0.97719 &   0.98646 
+&   0.13265 &   0.07103 &   0.05638 &   0.29296 &   0.05580 &   0.03060 &   0.93517 &   0.97288 &   0.99064 
+&   5.48139 &   0.20110 &   4.92858 &   11.39991 &   0.14130 &   0.07981 &   0.76358 &   0.91776 &   0.95914 
+
+
+CUDA_VISIBLE_DEVICES=0 python test.py  --model_path ./checkpoints/DA360_large.pth --model_name da360_l
