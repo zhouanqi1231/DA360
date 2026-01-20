@@ -15,6 +15,43 @@ import networks
 from datasets import Real
 from saver import Saver
 
+import open3d as o3d # You may need to pip install open3d
+
+def save_point_cloud(depth, rgb, output_path):
+    """
+    Converts equirectangular depth and RGB to a 3D point cloud.
+    depth: numpy array (H, W)
+    rgb: numpy array (H, W, 3) - scaled 0-1
+    """
+    h, w = depth.shape
+    
+    # Create coordinate grids
+    u, v = np.meshgrid(np.arange(w), np.arange(h))
+    
+    # Convert to spherical angles
+    theta = (u / w - 0.5) * 2 * np.pi
+    phi = (0.5 - v / h) * np.pi
+    
+    # Calculate Cartesian coordinates
+    x = depth * np.cos(phi) * np.sin(theta)
+    y = depth * np.sin(phi)
+    z = depth * np.cos(phi) * np.cos(theta)
+    
+    # Stack and reshape
+    points = np.stack((x, y, z), axis=-1).reshape(-1, 3)
+    colors = rgb.reshape(-1, 3)
+    
+    # Filter out invalid points (e.g., zero depth or infinity)
+    mask = np.isfinite(points).all(axis=1) & (depth.flatten() > 0)
+    points = points[mask]
+    colors = colors[mask]
+
+    # Create Open3D object and save
+    pcd = o3d.geometry.PointCloud()
+    pcd.points = o3d.utility.Vector3dVector(points)
+    pcd.colors = o3d.utility.Vector3dVector(colors)
+    o3d.io.write_point_cloud(output_path, pcd)
+
 parser = argparse.ArgumentParser(description="Test Depth Anything in 360°")
 
 parser.add_argument("--path", default="./data/images", type=str, help="path to test on.")
@@ -85,6 +122,20 @@ def main():
 
         saver.save_pred_samples(inputs["rgb"], pred_depth, name, args.model_name)
 
+        # 1. Prepare data for point cloud
+        # We use the raw RGB and the predicted depth
+        depth_np = pred_depth.squeeze().cpu().numpy()
+        
+        # Prepare RGB: inputs["rgb"] is likely (1, 3, H, W) and 0-255 or 0-1
+        rgb_np = inputs["rgb"].squeeze().permute(1, 2, 0).cpu().numpy()
+        if rgb_np.max() > 1.0: rgb_np /= 255.0 # Normalize if needed
+
+        # 2. Define output path
+        name = os.path.basename(rgb_list[idx])[:-4]
+        pc_path = os.path.join(args.model_path[:-4], "results", f"{name}.ply")
+        
+        # 3. Save
+        save_point_cloud(depth_np, rgb_np, pc_path)
 
 if __name__ == "__main__":
     main()
